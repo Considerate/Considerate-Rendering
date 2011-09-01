@@ -1,4 +1,4 @@
-var BaseObject =  {
+var BaseObject = module.exports = {
     create: function create() {
        var instance = Object.create(this);
        instance._construct.apply(instance, arguments);

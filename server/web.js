@@ -11,9 +11,9 @@ app.configure(function(){
     app.use(express.methodOverride());
     app.use(app.router);
     app.use(express.static(__dirname + '/../public'));
-    /*app.use(require('browserify')({
+    app.use(require('browserify')({
         require : __dirname + '/../shared/main'
-    }));*/
+    }));
 });
 
 // routes
