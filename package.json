@@ -7,10 +7,11 @@
     "type": "git",
     "url": "git://github.com/Considerate/Considerate-Rendering.git"
   },
-  "main": "./server/server.js",
+  "main": "server/server.js",
   "engines": {
     "node": "~v0.4.10"
   },
+  "scripts": {"start":"node server/server.js"},
   "dependencies": {
     "express": "~2.4.6",
     "stache": "~0.1.0",
