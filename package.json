@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git://github.com/Considerate/Considerate-Rendering.git"
   },
-  "main": "server/server.js",
+  "main": "./server/server.js",
   "engines": {
     "node": "~v0.4.10"
   },
