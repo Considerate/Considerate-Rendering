@@ -104,8 +104,8 @@ void main(void) {
     
 
     Sphere spheres[2];
-    spheres[1] = Sphere(vec3(0.0,0.0,10.0),3.0,vec4(0.8,0.0,0.2,1));
-    spheres[0] = Sphere(vec3(2.0,0.0,3.0),0.2,vec4(0.0,0.1,0.6,1));
+    spheres[1] = Sphere(vec3(0.0,0.0,3.0),1.0,vec4(0.8,0.0,0.2,1));
+    spheres[0] = Sphere(vec3(2.0,0.0,3.0),1.0,vec4(0.0,0.1,0.6,1));
         
     Light lights[1];
     lights[0] = Light(vec3(0.0,10.0,-20.0),vec4(1.0,1.0,1.0,1.0));
@@ -113,27 +113,64 @@ void main(void) {
     bool hit = false;
  
     gl_FragColor = vec4(0,0,0,1);
-    for(int i=0; i<2; i++)
+    
+    float mult = 1.0;
+    for(int n=0; n<10; n++)
     {
-        float t = 0.0;
-        if(intersect(ray,spheres[i],t) == true)
+    
+        bool hitThis = false;
+        float t = 1000000000.0;
+        Sphere hitSphere;
+        for(int i=0; i<2; i++)
         {
-            hit = true;
-            vec3 intersectionPoint = ray.ori + ray.dir*t;
-            vec3 normal = sphereNormal(intersectionPoint,spheres[i]);
+            float tempT = 0.0;
+            if(intersect(ray,spheres[i],tempT) == true)
+            {
+                if(tempT <= t)
+                {
+                    hitThis = true;
+                    hit = true;  
+                    t = tempT;
+                    hitSphere = spheres[i];
+                }
+            }
+        }
+        if(!hitThis)
+        {
+            break; //No hit, no more traced rays
+        }
+            
+        float roulette = fract(sin(gl_FragCoord.x * 12.9898
+            + gl_FragCoord.y * 78.233) * 43758.5453);
+        
+        vec3 intersectionPoint = ray.ori + ray.dir*t;
+        vec3 normal = sphereNormal(intersectionPoint,hitSphere);
+        
+        //if(roulette <= 0.2 ) 
+        {
+            //reflect
+            ray.dir = ray.dir - 2.0 * normal * dot( normal, ray.dir );
+            ray.ori = intersectionPoint+normalize(ray.dir)*0.0001;
+        }
+        //else
+        {
+            //diffuse
+            
+            
             
             vec3 lightRay = lights[0].position - intersectionPoint;
             lightRay = normalize(lightRay);
             
-            float dot = dot( normal, lightRay );
-            if (dot > 0.0)
+            float dotProduct = dot( normal, lightRay );
+            if (dotProduct > 0.0)
             {
-                float diff = dot * 0.6;
-                // add diffuse component to ray color
-                
-                gl_FragColor += diff * spheres[i].color * lights[0].color;
-            }
+                float diff = dotProduct * 0.9;
             
+                // add diffuse component to ray color
+                gl_FragColor += mult * diff * hitSphere.color * lights[0].color;
+                mult *= diff;
+            }
+            //break;
         }
     }
     
