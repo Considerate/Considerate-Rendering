@@ -12,8 +12,6 @@ var Renderer = module.exports = BaseObject.extend({
             self.initBuffers();
 
             self.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            self.gl.enable(self.gl.DEPTH_TEST);
-
             self.render();
         });
 
@@ -29,8 +27,6 @@ var Renderer = module.exports = BaseObject.extend({
             alert("Could not initialise WebGL, sorry :-(");
         }
         
-        this.mvMatrix = mat4.create();
-        this.pMatrix = mat4.create();
     },
     setMatrixUniforms: function () {
         this.gl.uniformMatrix4fv(this.shaderProgram.pMatrixUniform, false, this.pMatrix);
@@ -56,9 +52,6 @@ var Renderer = module.exports = BaseObject.extend({
 
                 self.shaderProgram.vertexPositionAttribute = self.gl.getAttribLocation(self.shaderProgram, "aVertexPosition");
                 self.gl.enableVertexAttribArray(self.shaderProgram.vertexPositionAttribute);
-
-                self.shaderProgram.pMatrixUniform = self.gl.getUniformLocation(self.shaderProgram, "uPMatrix");
-                self.shaderProgram.mvMatrixUniform = self.gl.getUniformLocation(self.shaderProgram, "uMVMatrix");
                 
                 callback();
             },"text");
@@ -66,20 +59,9 @@ var Renderer = module.exports = BaseObject.extend({
         
     },
     initBuffers: function(){
-        this.triangleVertexPositionBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
-        var vertices = [
-        0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-        1.0, -1.0,  0.0
-        ];
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
-        this.triangleVertexPositionBuffer.itemSize = 3;
-        this.triangleVertexPositionBuffer.numItems = 3;
-
         this.squareVertexPositionBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
-        vertices = [
+        var vertices = [
         1.0,  1.0,  0.0,
         -1.0,  1.0,  0.0,
         1.0, -1.0,  0.0,
@@ -90,24 +72,13 @@ var Renderer = module.exports = BaseObject.extend({
         this.squareVertexPositionBuffer.numItems = 4;
     },
     render: function(){
-        this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
+        this.gl.canvas.width  = window.innerWidth; 
+        this.gl.canvas.height = window.innerHeight;
+        this.gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-
-        mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 100.0, this.pMatrix);
-
-        mat4.identity(this.mvMatrix);
-
-        mat4.translate(this.mvMatrix, [-1.5, 0.0, -7.0]);
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
-        this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
-        this.setMatrixUniforms();
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, this.triangleVertexPositionBuffer.numItems);
-
-
-        mat4.translate(this.mvMatrix, [3.0, 0.0, 0.0]);
+        
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
         this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.squareVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
-        this.setMatrixUniforms();
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.squareVertexPositionBuffer.numItems);
     }
 });
