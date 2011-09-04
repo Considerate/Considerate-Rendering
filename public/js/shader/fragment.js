@@ -88,7 +88,7 @@ void main(void) {
     float height = 600.0;
     
     float PI = 3.14159265358979323846264;
-    float fovx = PI*0.25;
+    float fovx = PI*0.3;
     float fovy = height/width*fovx;
     
     
